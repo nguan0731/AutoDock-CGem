@@ -71,6 +71,7 @@ fl ad4cache::eval(const model& m, fl v) const {
 			case AD_TYPE_G1:
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
+			case AD_TYPE_CHG:
 				continue;
 			case AD_TYPE_CG0:
 			case AD_TYPE_CG1:
@@ -110,6 +111,7 @@ fl ad4cache::eval_intra(model& m, fl v) const {
 			case AD_TYPE_G1:
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
+			case AD_TYPE_CHG:
 				continue;
 			case AD_TYPE_CG0:
 			case AD_TYPE_CG1:
@@ -148,6 +150,7 @@ fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
 			case AD_TYPE_G1:
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
+			case AD_TYPE_CHG:
 				m.minus_forces[i].assign(0);
 				continue;
 			case AD_TYPE_CG0:
@@ -203,6 +206,7 @@ bool ad4cache::are_atom_types_grid_initialized(szv atom_types) const {
 			case AD_TYPE_G1:
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
+			case AD_TYPE_CHG:
 				continue;
 			case AD_TYPE_CG0:
 			case AD_TYPE_CG1:
@@ -315,6 +319,7 @@ grid_dims ad4cache::read(const std::string& map_prefix) {
 		case AD_TYPE_G1:
 		case AD_TYPE_G2:
 		case AD_TYPE_G3:
+		case AD_TYPE_CHG:
 			continue;
 		case AD_TYPE_CG0:
 		case AD_TYPE_CG1:
@@ -365,6 +370,7 @@ void ad4cache::write(const std::string& out_prefix, const szv& atom_types, const
 			case AD_TYPE_G1:
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
+			case AD_TYPE_CHG:
 				continue;
 			case AD_TYPE_CG0:
 			case AD_TYPE_CG1:

@@ -443,6 +443,7 @@ void model::assign_types() {
                 else if (a.ad == AD_TYPE_G2) x = XS_TYPE_G2;
                 else if (a.ad == AD_TYPE_G3) x = XS_TYPE_G3;
                 else if (a.ad == AD_TYPE_W)  x = XS_TYPE_SIZE; // no W atoms in XS types
+                else if (a.ad == AD_TYPE_CHG)  x = XS_TYPE_CHG;
                 else VINA_CHECK(false);
                 break;
             }
