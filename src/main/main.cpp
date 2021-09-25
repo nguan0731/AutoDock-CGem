@@ -25,7 +25,6 @@
 #include <vector> // ligand paths
 #include <exception>
 #include <boost/program_options.hpp>
-#include "parse_error.h"
 #include "vina.h"
 #include "utils.h"
 #include "scoring_function.h"
@@ -65,7 +64,8 @@ void check_occurrence(boost::program_options::variables_map& vm, boost::program_
 
 int main(int argc, char* argv[]) {
 	using namespace boost::program_options;
-	const std::string version_string = "AutoDock Vina 1.2.0.dev3 (March 1, 2021)";
+	const std::string git_version = VERSION;
+	const std::string version_string = "AutoDock Vina " + git_version;
 	const std::string error_message = "\n\n\
 Please report bugs through the Issue Tracker on GitHub \n\
 (https://github.com/ccsb-scripps/AutoDock-Vina/issues)., so\n\
@@ -90,15 +90,19 @@ Thank you!\n";
 #################################################################\n\
 # If you used AutoDock Vina in your work, please cite:          #\n\
 #                                                               #\n\
+# J. Eberhardt, D. Santos-Martins, A. F. Tillack, and S. Forli  #\n\
+# AutoDock Vina 1.2.0: New Docking Methods, Expanded Force      #\n\
+# Field, and Python Bindings, J. Chem. Inf. Model. (2021)       #\n\
+# DOI 10.1021/acs.jcim.1c00203                                  #\n\
+#                                                               #\n\
 # O. Trott, A. J. Olson,                                        #\n\
 # AutoDock Vina: improving the speed and accuracy of docking    #\n\
 # with a new scoring function, efficient optimization and       #\n\
-# multithreading, Journal of Computational Chemistry 31 (2010)  #\n\
-# 455-461                                                       #\n\
-#                                                               #\n\
+# multithreading, J. Comp. Chem. (2010)                         #\n\
 # DOI 10.1002/jcc.21334                                         #\n\
 #                                                               #\n\
-# Please see http://vina.scripps.edu for more information.      #\n\
+# Please see https://github.com/ccsb-scripps/AutoDock-Vina for  #\n\
+# more information.                                             #\n\
 #################################################################\n";
 
 	try {
@@ -127,6 +131,7 @@ Thank you!\n";
 		double min_rmsd = 1.0;
 		double energy_range = 3.0;
 		double grid_spacing = 0.375;
+		double buffer_size = 4;
 
 		// autodock4.2 weights
 		double weight_ad4_vdw   = 0.1662;
@@ -160,6 +165,7 @@ Thank you!\n";
 		bool help = false;
 		bool help_advanced = false;
 		bool version = false; // FIXME
+		bool autobox = false;
 		variables_map vm;
 
 		positional_options_description positional; // remains empty
@@ -182,6 +188,7 @@ Thank you!\n";
 			("size_x", value<double>(&size_x), "size in the X dimension (Angstrom)")
 			("size_y", value<double>(&size_y), "size in the Y dimension (Angstrom)")
 			("size_z", value<double>(&size_z), "size in the Z dimension (Angstrom)")
+			("autobox", bool_switch(&autobox), "set maps dimensions based on input ligand(s) (for --score_only and --local_only)")
 		;
 		//options_description outputs("Output prefixes (optional - by default, input names are stripped of .pdbqt\nare used as prefixes. _001.pdbqt, _002.pdbqt, etc. are appended to the prefixes to produce the output names");
 		options_description outputs("Output (optional)");
@@ -246,6 +253,7 @@ Thank you!\n";
 		desc_config.add(inputs).add(search_area).add(outputs).add(advanced).add(misc);
 		desc_simple.add(inputs).add(search_area).add(outputs).add(misc).add(config).add(info);
 
+		std::cout << version_string << '\n';
 		try {
 			//store(parse_command_line(argc, argv, desc, command_line_style::default_style ^ command_line_style::allow_guessing), vm);
 			store(command_line_parser(argc, argv)
@@ -284,7 +292,6 @@ Thank you!\n";
 		}
 
 		if (version) {
-			std::cout << version_string << '\n';
 			return 0;
 		}
 
@@ -360,10 +367,14 @@ Thank you!\n";
 			} else if (batch_ligand_names.size() > 1) {
 				std::cout << "Ligands (batch mode): " << batch_ligand_names.size() << " molecules\n";
 			}
-			if (!vm.count("maps")) {
-				std::cout << "Center: X " << center_x << " Y " << center_y << " Z " << center_z << "\n";
-				std::cout << "Size: X " << size_x << " Y " << size_y << " Z " << size_z << "\n";
-				std::cout << "Grid space: " << grid_spacing << "\n";
+			if (!vm.count("maps") & !autobox) {
+				std::cout << "Grid center: X " << center_x << " Y " << center_y << " Z " << center_z << "\n";
+				std::cout << "Grid size  : X " << size_x << " Y " << size_y << " Z " << size_z << "\n";
+				std::cout << "Grid space : " << grid_spacing << "\n";
+			} else if (autobox) {
+				std::cout << "Grid center: ligand center (autobox)\n";
+				std::cout << "Grid size  : ligand size + " << buffer_size << " A in each dimension (autobox)\n";
+				std::cout << "Grid space : " << grid_spacing << "\n";
 			}
 			std::cout << "Exhaustiveness: " << exhaustiveness << "\n";
 			std::cout << "CPU: " << cpu << "\n";
@@ -401,12 +412,18 @@ Thank you!\n";
 		if (vm.count("ligand")) {
 			v.set_ligand_from_file(ligand_names);
 
-			if (sf_name.compare("vina") == 0) {
+			if (sf_name.compare("vina") == 0 || sf_name.compare("vinardo") == 0) {
 				if (vm.count("maps")) {
 					v.load_maps(maps);
 				} else {
 					// Will compute maps only for Vina atom types in the ligand(s)
-					v.compute_vina_maps(center_x, center_y, center_z, size_x, size_y, size_z, grid_spacing, force_even_voxels);
+					// In the case users ask for score and local only with the autobox arg, we compute the optimal box size for it/them.
+					if ((score_only || local_only) & autobox) {
+						std::vector<double> dim = v.grid_dimensions_from_ligand(buffer_size);
+						v.compute_vina_maps(dim[0], dim[1], dim[2], dim[3], dim[4], dim[5], grid_spacing, force_even_voxels);
+					} else {
+						v.compute_vina_maps(center_x, center_y, center_z, size_x, size_y, size_z, grid_spacing, force_even_voxels);
+					}
 
 					if (vm.count("write_maps"))
 						v.write_maps(out_maps);
@@ -421,8 +438,10 @@ Thank you!\n";
 				energies = v.score();
 				v.show_score(energies);
 			} else if (local_only) {
-				v.optimize();
+				std::vector<double> energies;
+				energies = v.optimize();
 				v.write_pose(out_name);
+				v.show_score(energies);
 			} else {
 				v.global_search(exhaustiveness, num_modes, min_rmsd, max_evals);
 				v.write_poses(out_name, num_modes, energy_range);
@@ -471,10 +490,6 @@ Thank you!\n";
 	}
 	catch(usage_error& e) {
 		std::cerr << "\n\nUsage error: " << e.what() << ".\n";
-		return 1;
-	}
-	catch(parse_error& e) {
-		std::cerr << "\n\nParse error on line " << e.line << " in file \"" << e.file.string() << "\": " << e.reason << '\n';
 		return 1;
 	}
 	catch(std::bad_alloc&) {

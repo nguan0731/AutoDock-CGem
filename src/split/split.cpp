@@ -68,34 +68,35 @@ models parse_multimodel_pdbqt(const std::string& input) {
 	std::string str;
 	bool parsing_model = false;
 	bool parsing_ligand = true;
+
 	while(std::getline(in, str)) {
 		++count;
 		if(starts_with(str, "MODEL")) {
 			if(parsing_model == true || parsing_ligand == false) 
-				throw parse_error(p, count, "Misplaced MODEL tag");
+				throw pdbqt_parse_error("Misplaced MODEL tag at line " + std::to_string(count) + ".");
 			tmp.push_back(model());
 			parsing_model = true;
 		}
 		else if(starts_with(str, "ENDMDL")) {
 			if(parsing_model == false || parsing_ligand == false)
-				throw parse_error(p, count, "Misplaced ENDMDL tag");
+				throw pdbqt_parse_error("Misplaced ENDMDL tag at line " + std::to_string(count) + ".");
 			parsing_model = false;
 		}
 		else if(starts_with(str, "BEGIN_RES")) {
 			if(parsing_model == false || parsing_ligand == false)
-				throw parse_error(p, count, "Misplaced BEGIN_RES tag");
+				throw pdbqt_parse_error("Misplaced BEGIN_RES tag at line " + std::to_string(count) + ".");
 			parsing_ligand = false;
 			tmp.back().flex.push_back(str);
 		}
 		else if(starts_with(str, "END_RES")) {
 			if(parsing_model == false || parsing_ligand == true)
-				throw parse_error(p, count, "Misplaced END_RES tag");
+				throw pdbqt_parse_error("Misplaced END_RES tag at line " + std::to_string(count) + ".");
 			parsing_ligand = true;
 			tmp.back().flex.push_back(str);
 		}
 		else {
 			if(parsing_model == false)
-				throw parse_error(p, count, "Input occurs outside MODEL");
+				throw pdbqt_parse_error("Input occurs outside MODEL at line " + std::to_string(count) + ".");
 			if(parsing_ligand) {
 				tmp.back().ligand.push_back(str);
 			}
@@ -105,7 +106,7 @@ models parse_multimodel_pdbqt(const std::string& input) {
 		}
 	}
 	if(parsing_model == true)
-		throw parse_error(p, count+1, "Missing ENDMDL tag");
+		throw pdbqt_parse_error("Missing ENDMDL tag at line " + std::to_string(count + 1) + ".");
 	return tmp;
 }
 
@@ -132,7 +133,8 @@ void write_multimodel_pdbqt(const models& m, const std::string& ligand_prefix, c
 int main(int argc, char* argv[]) {
 	using namespace boost::program_options;
 	const bool advanced = false;
-	const std::string version_string = "AutoDock Vina PDBQT Split 1.1.2 (May 11, 2011)";
+	const std::string git_version = VERSION;
+	const std::string version_string = "AutoDock Vina PDBQT Split " + git_version;
 
 	const std::string error_message = "\n\n\
 Please contact the author, Dr. Oleg Trott <ot14@columbia.edu>, so\n\
@@ -167,6 +169,7 @@ Thank you!\n";
 		options_description desc;
 		desc.add(inputs).add(outputs).add(info);
 
+		std::cout << version_string << '\n';
 		positional_options_description positional; // remains empty
 		variables_map vm;
 		try {
@@ -187,7 +190,6 @@ Thank you!\n";
 			return 0;
 		}
 		if(version) {
-			std::cout << version_string << '\n';
 			return 0;
 		}
 
@@ -218,9 +220,9 @@ Thank you!\n";
 		std::cerr << "\n\nUsage error: " << e.what() << ".\n";
 		return 1;
 	}
-	catch(parse_error& e) {
-		std::cerr << "\n\nParse error on line " << e.line << " in file \"" << e.file.string() << "\": " << e.reason << '\n';
-		return 1;
+	catch(pdbqt_parse_error& e) {
+		std::cerr << e.what();
+        return 1;
 	}
 	catch(std::bad_alloc&) {
 		std::cerr << "\n\nError: insufficient memory!\n";
