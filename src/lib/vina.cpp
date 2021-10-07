@@ -548,17 +548,17 @@ std::string Vina::vina_remarks(output_type &pose, fl lb, fl ub) {
 	remark.setf(std::ios::showpoint);
 
 	remark << "REMARK VINA RESULT: "
-		   << std::setw(9) << std::setprecision(3) << pose.e
-		   << "  " << std::setw(9) << std::setprecision(3) << lb
-		   << "  " << std::setw(9) << std::setprecision(3) << ub
+		   << std::setw(9) << std::setprecision(6) << pose.e
+		   << "  " << std::setw(9) << std::setprecision(6) << lb
+		   << "  " << std::setw(9) << std::setprecision(6) << ub
 		   << '\n';
 
-	remark << "REMARK INTER + INTRA:    " << std::setw(12) << std::setprecision(3) << pose.total << "\n";
-	remark << "REMARK INTER:            " << std::setw(12) << std::setprecision(3) << pose.inter << "\n";
-	remark << "REMARK INTRA:            " << std::setw(12) << std::setprecision(3) << pose.intra << "\n";
+	remark << "REMARK INTER + INTRA:    " << std::setw(12) << std::setprecision(6) << pose.total << "\n";
+	remark << "REMARK INTER:            " << std::setw(12) << std::setprecision(6) << pose.inter << "\n";
+	remark << "REMARK INTRA:            " << std::setw(12) << std::setprecision(6) << pose.intra << "\n";
 	if (m_sf_choice == SF_AD42)
-		remark << "REMARK CONF_INDEPENDENT: " << std::setw(12) << std::setprecision(3) << pose.conf_independent << "\n";
-	remark << "REMARK UNBOUND:          " << std::setw(12) << std::setprecision(3) << pose.unbound << "\n";
+		remark << "REMARK CONF_INDEPENDENT: " << std::setw(12) << std::setprecision(6) << pose.conf_independent << "\n";
+	remark << "REMARK UNBOUND:          " << std::setw(12) << std::setprecision(6) << pose.unbound << "\n";
 
 	return remark.str();
 }
@@ -683,19 +683,19 @@ void Vina::randomize(const int max_steps) {
 }
 
 void Vina::show_score(const std::vector<double> energies) {
-	std::cout << "Estimated Free Energy of Binding   : " << std::fixed << std::setprecision(3) << energies[0] << " (kcal/mol) [=(1)+(2)+(3)+(4)]\n";
-	std::cout << "(1) Final Intermolecular Energy    : " << std::fixed << std::setprecision(3) << energies[1] + energies[2] << " (kcal/mol)\n";
-	std::cout << "    Ligand - Receptor              : " << std::fixed << std::setprecision(3) << energies[1] << " (kcal/mol)\n";
-	std::cout << "    Ligand - Flex side chains      : " << std::fixed << std::setprecision(3) << energies[2] << " (kcal/mol)\n";
-	std::cout << "(2) Final Total Internal Energy    : " << std::fixed << std::setprecision(3) << energies[3] + energies[4] + energies[5] << " (kcal/mol)\n";
-	std::cout << "    Ligand                         : " << std::fixed << std::setprecision(3) << energies[5] << " (kcal/mol)\n";
-	std::cout << "    Flex   - Receptor              : " << std::fixed << std::setprecision(3) << energies[3] << " (kcal/mol)\n";
-	std::cout << "    Flex   - Flex side chains      : " << std::fixed << std::setprecision(3) << energies[4] << " (kcal/mol)\n";
-	std::cout << "(3) Torsional Free Energy          : " << std::fixed << std::setprecision(3) << energies[6] << " (kcal/mol)\n";
+	std::cout << "Estimated Free Energy of Binding   : " << std::fixed << std::setprecision(6) << energies[0] << " (kcal/mol) [=(1)+(2)+(3)+(4)]\n";
+	std::cout << "(1) Final Intermolecular Energy    : " << std::fixed << std::setprecision(6) << energies[1] + energies[2] << " (kcal/mol)\n";
+	std::cout << "    Ligand - Receptor              : " << std::fixed << std::setprecision(6) << energies[1] << " (kcal/mol)\n";
+	std::cout << "    Ligand - Flex side chains      : " << std::fixed << std::setprecision(6) << energies[2] << " (kcal/mol)\n";
+	std::cout << "(2) Final Total Internal Energy    : " << std::fixed << std::setprecision(6) << energies[3] + energies[4] + energies[5] << " (kcal/mol)\n";
+	std::cout << "    Ligand                         : " << std::fixed << std::setprecision(6) << energies[5] << " (kcal/mol)\n";
+	std::cout << "    Flex   - Receptor              : " << std::fixed << std::setprecision(6) << energies[3] << " (kcal/mol)\n";
+	std::cout << "    Flex   - Flex side chains      : " << std::fixed << std::setprecision(6) << energies[4] << " (kcal/mol)\n";
+	std::cout << "(3) Torsional Free Energy          : " << std::fixed << std::setprecision(6) << energies[6] << " (kcal/mol)\n";
 	if (m_sf_choice == SF_VINA || m_sf_choice == SF_VINARDO) {
-		std::cout << "(4) Unbound System's Energy        : " << std::fixed << std::setprecision(3) << energies[7] << " (kcal/mol)\n";
+		std::cout << "(4) Unbound System's Energy        : " << std::fixed << std::setprecision(6) << energies[7] << " (kcal/mol)\n";
 	} else {
-		std::cout << "(4) Unbound System's Energy [=(2)] : " << std::fixed << std::setprecision(3) << energies[7] << " (kcal/mol)\n";
+		std::cout << "(4) Unbound System's Energy [=(2)] : " << std::fixed << std::setprecision(6) << energies[7] << " (kcal/mol)\n";
 	}
 }
 
@@ -1014,9 +1014,9 @@ void Vina::global_search(const int exhaustiveness, const int n_poses, const doub
 			poses[i].ub = m_model.rmsd_upper_bound(r);
 
 			if (m_verbosity > 0) {
-				std::cout << std::setw(4) << i + 1 << "    " << std::setw(9) << std::setprecision(4) << poses[i].e;
-				std::cout << "  " << std::setw(9) << std::setprecision(4) << poses[i].lb;
-				std::cout << "  " << std::setw(9) << std::setprecision(4) << poses[i].ub << "\n";
+				std::cout << std::setw(4) << i + 1 << "    " << std::setw(9) << std::setprecision(6) << poses[i].e;
+				std::cout << "  " << std::setw(9) << std::setprecision(6) << poses[i].lb;
+				std::cout << "  " << std::setw(9) << std::setprecision(6) << poses[i].ub << "\n";
 			}
 		}
 
