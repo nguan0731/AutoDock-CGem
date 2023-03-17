@@ -56,12 +56,27 @@ std::string get_adtype_str(sz& t) {
 
 fl ad4cache::eval(const model& m, fl v) const {
 	fl e = 0;
-	sz nat = num_atom_types(atom_type::AD);
-
-	VINA_FOR(i, m.num_movable_atoms()) {
+	fl e_elec = 0;
+	fl e_shell = 0;
+    fl e_hb_vdw = 0;
+    fl e_desolv = 0;
+    sz nat = num_atom_types(atom_type::AD);
+    sz n_movable_atoms = m.num_movable_atoms();
+    // check if cgem shell exist and flag as hybrid to modify core charge
+    bool hybrid = false;
+    VINA_FOR(i, m.num_atoms()) {
+        if(!m.is_atom_in_ligand(i)) continue; //
+        const atom& a = m.atoms[i];
+        sz t = a.get(atom_type::AD);
+        if(t == AD_TYPE_CHG){
+            hybrid = true;}
+    } 
+	// VINA_FOR(i, m.num_movable_atoms()) {
+	VINA_FOR(i, m.num_atoms()) {
 		if(!m.is_atom_in_ligand(i)) continue; // we only want ligand interaction
 		const atom& a = m.atoms[i];
 		sz t = a.get(atom_type::AD);
+        if( (!t == AD_TYPE_CHG) and i > n_movable_atoms) continue;  
 
 		switch (t)
 		{
@@ -80,30 +95,67 @@ fl ad4cache::eval(const model& m, fl v) const {
 
 		// elec
 		const grid& ge = m_grids[AD_TYPE_SIZE];
-		e += ge.evaluate(m.coords[i], m_slope, v) * a.charge;
-
-		if (t == AD_TYPE_CHG) continue;
+		// e += ge.evaluate(m.coords[i], m_slope, v) * a.charge;
+		bool positive_charge = (a.charge > 0);
+        fl de;
+        if (hybrid and (!t == AD_TYPE_CHG)){
+            de = ge.evaluate(m.coords[i], m_slope, v) * 1.0;
+        }
+        else{
+		    de = ge.evaluate(m.coords[i], m_slope, v, positive_charge) * a.charge;
+        }
+        e += de;
+        e_elec += de;
+        /*
+        std::cout << "coords for "<< t <<": ";
+        for (int j = 0; j < 3; j++){
+            std::cout << m.coords[i][j] <<" ";
+        }
+        std::cout << "\n" << "de_electrostatic: " << de << "\n" ;
+		if (t == AD_TYPE_CHG){
+            e_shell += de ;
+            //std::cout << "e: " << e <<" e_shell: " << e_shell <<"\n";
+        }
+        */
+	    if (t == AD_TYPE_CHG) continue;
 
 		// HB + vdW
 		const grid& g = m_grids[t];
-		e += g.evaluate(m.coords[i], m_slope, v);
+        de = g.evaluate(m.coords[i], m_slope, v);
+        e_hb_vdw += de;
+		e += de;
+        //e += g.evaluate(m.coords[i], m_slope, v);
 
 		// desolv
 		const grid& gd = m_grids[AD_TYPE_SIZE + 1];
-		e += gd.evaluate(m.coords[i], m_slope, v) * std::abs(a.charge);
+		de = gd.evaluate(m.coords[i], m_slope, v) * std::abs(a.charge);
+        e_desolv += de;
+        e += de;
+		//e += gd.evaluate(m.coords[i], m_slope, v) * std::abs(a.charge);
 	}
+    std::cout << "e: " << e <<" e_shell: " << e_shell <<"\n";
+    std::cout << "e_elec: " << e_elec <<" e_vdw + e_HB + e_desolv: " << e - e_elec <<"\n";
+    std::cout << "e_vdW + e_HB: " << e_hb_vdw <<" e_desolv: " << e_desolv <<"\n";
+
+
 	return e;
 }
 
 fl ad4cache::eval_intra(model& m, fl v) const {
+    std::cout << "ad4cache::eval_intra"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
-
-	VINA_FOR(i, m.num_movable_atoms()) {
+    sz n_movable_atoms = m.num_movable_atoms();
+	VINA_FOR(i, m.num_atoms()) {
+		if(m.is_atom_in_ligand(i)) continue; // we only want flex-ligand interaction
+		const atom& a = m.atoms[i];
+		sz t = a.get(atom_type::AD);
+        if( (!t == AD_TYPE_CHG) and i > n_movable_atoms) continue;  
+	/*VINA_FOR(i, m.num_movable_atoms()) {
 		if(m.is_atom_in_ligand(i)) continue; // we only want flex-rigid interaction
 		const atom& a = m.atoms[i];
 		sz t = a.get(atom_type::AD);
-
+    */
 		switch (t)
 		{
 			case AD_TYPE_G0:
@@ -121,7 +173,10 @@ fl ad4cache::eval_intra(model& m, fl v) const {
 
 		// elec
 		const grid& ge = m_grids[AD_TYPE_SIZE];
-		e += ge.evaluate(m.coords[i], m_slope, v) * a.charge;
+		//e += ge.evaluate(m.coords[i], m_slope, v) * a.charge;
+		bool positive_charge = (a.charge > 0);
+		fl de = ge.evaluate(m.coords[i], m_slope, v, positive_charge) * a.charge;
+        e += de;
 
 		if (t == AD_TYPE_CHG) continue;
 
@@ -137,13 +192,18 @@ fl ad4cache::eval_intra(model& m, fl v) const {
 }
 
 fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
+    //std::cout << "ad4cache::eval_deriv"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
-
-	VINA_FOR(i, m.num_movable_atoms()) {
+    sz n_movable_atoms = m.num_movable_atoms();
+	VINA_FOR(i, m.num_atoms()) {
 		const atom& a = m.atoms[i];
 		sz t = a.get(atom_type::AD);
-
+        if( (!t == AD_TYPE_CHG) and i > n_movable_atoms) continue;  
+	/*VINA_FOR(i, m.num_movable_atoms()) {
+		const atom& a = m.atoms[i];
+		sz t = a.get(atom_type::AD);
+    */
 		switch (t)
 		{
 			case AD_TYPE_G0:
@@ -164,7 +224,11 @@ fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
 
 		// elec
 		const grid& ge = m_grids[AD_TYPE_SIZE];
-		e += ge.evaluate(m.coords[i], m_slope, v, deriv) * a.charge;
+		bool positive_charge = (a.charge > 0);
+		fl de = ge.evaluate(m.coords[i], m_slope, v, deriv, positive_charge) * a.charge;
+        e += de;
+		//e += ge.evaluate(m.coords[i], m_slope, v, deriv) * a.charge;
+
 		deriv *= a.charge;
 		m.minus_forces[i] = deriv;
 

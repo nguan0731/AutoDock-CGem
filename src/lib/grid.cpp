@@ -38,7 +38,7 @@ void grid::init(const grid_dims& gd) {
 	}
 }
 
-fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv) const { // sets *deriv if not NULL
+fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv, bool positive_charge = true) const { // sets *deriv if not NULL
 	vec s  = elementwise_product(location - m_init, m_factor); 
 
 	vec miss(0, 0, 0);
@@ -69,9 +69,35 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv) const { /
 		assert(a[i] >= 0);
 		assert(a[i]+1 < m_data.dim(i));
 	}
-	const fl penalty = slope * (miss * m_factor_inv); // FIXME check that inv_factor is correctly initialized and serialized
+	fl penalty = slope * (miss * m_factor_inv); // FIXME check that inv_factor is correctly initialized and serialized
 	assert(penalty > -epsilon_fl);
-
+    // fix problem of OC penalty gives large negative energy contribution
+    if (!positive_charge){
+        penalty = -penalty;
+    }
+    /*
+    if (penalty > 0){
+        
+        std::cout << "miss: "  <<"\n";
+        for (int i = 0; i < 3; i++){
+            std::cout << miss[i]  <<" ";
+        }
+        std::cout <<"\n";
+        std::cout << "m_factor_inv: " <<"\n";
+        for (int i = 0; i < 3; i++){
+            std::cout << m_factor_inv[i]  <<" ";
+        }
+        std::cout <<"\n";
+        std::cout << "(miss * m_factor_inv)" << (miss * m_factor_inv) <<"\n";
+        std::cout << "location: " <<"\n";
+        for (int i = 0; i < 3; i++){
+            std::cout << location[i]  <<" ";
+        }
+        std::cout <<"\n";
+        std::cout << "penalty: "<<penalty <<"\n";
+        std::cout <<"\n\n";   
+    }
+    */
 	const sz x0 = a[0];
 	const sz y0 = a[1];
 	const sz z0 = a[2];
@@ -154,6 +180,10 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv) const { /
 	}
 	else {
 		curl(f, v);
+        /*
+        if (penalty > 0){
+            std::cout << "In grid else, f:"<< f <<"  penalty: "<< penalty << "\n";
+        }*/
 		return f + penalty;
 	}
 } 

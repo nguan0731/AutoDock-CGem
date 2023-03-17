@@ -735,7 +735,7 @@ std::vector<double> Vina::score(double intramolecular_energy) {
 		conf_independent = total - (inter + intra - intramolecular_energy);
 	} else {
 		// Inter
-		lig_grids = m_ad4grid.eval(m_model, authentic_v[1]); // [1] ligand - grid
+        lig_grids = m_ad4grid.eval(m_model, authentic_v[1]); // [1] ligand - grid
 		inter_pairs = m_model.eval_inter(m_precalculated_byatom, authentic_v); // [1] ligand - flex
 		inter = lig_grids + inter_pairs;
 		// Intra
@@ -794,6 +794,7 @@ std::vector<double> Vina::score() {
 
 std::vector<double> Vina::optimize(output_type& out, int max_steps) {
 	// Local optimization of the ligand conf
+    std::cout << "vina::optimize 2 args"<<"\n";
 	change g(m_model.get_size());
 	quasi_newton quasi_newton_par;
 	const fl slope = 1e6;
@@ -841,6 +842,7 @@ std::vector<double> Vina::optimize(int max_steps) {
 	// Local optimization of the ligand conf
 	// Check if ff, box and ligand were initialized
 	// Check if the ligand is not outside the box
+    std::cout << "vina::optimize 1 args"<<"\n";
 	if (!m_ligand_initialized) {
 		std::cerr << "ERROR: Cannot do the optimization. Ligand(s) was(ere) not initialized.\n";
 		exit(EXIT_FAILURE);
@@ -881,6 +883,7 @@ output_container Vina::remove_redundant(const output_container &in, fl min_rmsd)
 void Vina::global_search(const int exhaustiveness, const int n_poses, const double min_rmsd, const int max_evals) {
 	// Vina search (Monte-carlo and local optimization)
 	// Check if ff, box and ligand were initialized
+    std::cout << "vina::global_search"<<"\n";
 	if (!m_ligand_initialized) {
 		std::cerr << "ERROR: Cannot do the global search. Ligand(s) was(ere) not initialized.\n";
 		exit(EXIT_FAILURE);
