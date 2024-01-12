@@ -361,6 +361,18 @@ public:
         if (r >= cutoff)
             return 0.0;
         fl q1q2 = a.charge * b.charge * 332.0;
+        
+        // modify to check types for ad4_cgem and modify to integer charge
+        sz t_a = a.get(atom_type::AD);
+        sz t_b = b.get(atom_type::AD);
+        if(t_a == AD_TYPE_CHG){
+            if (t_b == AD_TYPE_CHG){ 
+                q1q2 = 332.0;}
+            else{ 
+                q1q2 = -332.0;}}
+        else if (t_b == AD_TYPE_CHG){ //t_a not CHG for sure
+            q1q2 = -332.0;}
+
         fl B = 78.4 + 8.5525;
         fl lB = -B * 0.003627;
         fl diel = -8.5525 + (B / (1 + 7.7839 * std::exp(lB * r)));
