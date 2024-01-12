@@ -72,12 +72,14 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv, bool posi
 	fl penalty = slope * (miss * m_factor_inv); // FIXME check that inv_factor is correctly initialized and serialized
 	assert(penalty > -epsilon_fl);
     // fix problem of OC penalty gives large negative energy contribution
-    if (!positive_charge){
-        penalty = -penalty;
-    }
     /*
+    if (!positive_charge){
+        penalty = 0; //-penalty;
+    }
+    */
+    /*    
     if (penalty > 0){
-        
+           
         std::cout << "miss: "  <<"\n";
         for (int i = 0; i < 3; i++){
             std::cout << miss[i]  <<" ";
@@ -93,9 +95,10 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv, bool posi
         for (int i = 0; i < 3; i++){
             std::cout << location[i]  <<" ";
         }
-        std::cout <<"\n";
-        std::cout << "penalty: "<<penalty <<"\n";
-        std::cout <<"\n\n";   
+        
+        std::cout <<"slope: " << slope << "\n";
+        std::cout << "\npenalty: "<<penalty <<"\n";
+        //std::cout <<"\n\n";   
     }
     */
 	const sz x0 = a[0];
