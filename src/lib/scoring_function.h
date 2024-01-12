@@ -96,17 +96,22 @@ public:
     };
     ~ScoringFunction() { }
     fl eval(atom& a, atom& b, fl r) const{ // intentionally not checking for cutoff
+        //std::cout << "scoring function eval1" << "\n";
         fl acc = 0;
         VINA_FOR (i, m_num_potentials)
         {
+           // std::cout << i << " weight: " << m_weights[i] << " potential: " << m_potentials[i] << "\n";   
             acc += m_weights[i] * m_potentials[i]->eval(a, b, r);
         }
+        // std::cout << "scoring function eval1 acc:" << acc << "\n";
         return acc;
     };
     fl eval(sz t1, sz t2, fl r) const{
+        //std::cout << "scoring function eval2" << "\n";
         fl acc = 0;
         VINA_FOR (i, m_num_potentials)
         {
+           // std::cout << i << " weight: " << m_weights[i] << " potential: " << m_potentials[i] << "\n";   
             acc += m_weights[i] * m_potentials[i]->eval(t1, t2, r);
         }
         return acc;

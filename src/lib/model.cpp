@@ -769,8 +769,10 @@ fl eval_interacting_pairs(const precalculate_byatom& p, fl v, const interacting_
 			fl tmp = p.eval_fast(ip.a, ip.b, r2);
 			curl(tmp, v);
 			e += tmp;
+            //std::cout << "tmp: " << tmp <<" e: " << e << "\n";
 		}
 	}
+    //std::cout << "final e in eval_interacting_pairs: " << e << "\n";
 	return e;
 }
 
