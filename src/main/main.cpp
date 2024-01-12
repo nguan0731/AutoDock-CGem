@@ -443,6 +443,7 @@ Thank you!\n";
 				v.write_pose(out_name);
 				v.show_score(energies);
 			} else {
+                std::cout << "calling global search" << "/n";
 				v.global_search(exhaustiveness, num_modes, min_rmsd, max_evals);
 				v.write_poses(out_name, num_modes, energy_range);
 			}

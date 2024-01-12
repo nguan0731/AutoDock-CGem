@@ -683,7 +683,7 @@ void Vina::randomize(const int max_steps) {
 }
 
 void Vina::show_score(const std::vector<double> energies) {
-	std::cout << "Estimated Free Energy of Binding   : " << std::fixed << std::setprecision(3) << energies[0] << " (kcal/mol) [=(1)+(2)+(3)+(4)]\n";
+	std::cout << "Estimated Free Energy of Binding   : " << std::fixed << std::setprecision(6) << energies[0] << " (kcal/mol) [=(1)+(2)+(3)+(4)]\n";
 	std::cout << "(1) Final Intermolecular Energy    : " << std::fixed << std::setprecision(3) << energies[1] + energies[2] << " (kcal/mol)\n";
 	std::cout << "    Ligand - Receptor              : " << std::fixed << std::setprecision(3) << energies[1] << " (kcal/mol)\n";
 	std::cout << "    Ligand - Flex side chains      : " << std::fixed << std::setprecision(3) << energies[2] << " (kcal/mol)\n";
