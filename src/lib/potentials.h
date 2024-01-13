@@ -360,18 +360,19 @@ public:
     fl eval(const atom& a, const atom& b, fl r) {
         if (r >= cutoff)
             return 0.0;
-        fl q1q2 = a.charge * b.charge * 332.0;
+        fl elec_const = 14.3996 * 23.0609;
+        fl q1q2 = a.charge * b.charge * elec_const;
         
         // modify to check types for ad4_cgem and modify to integer charge
         sz t_a = a.get(atom_type::AD);
         sz t_b = b.get(atom_type::AD);
         if(t_a == AD_TYPE_CHG){
             if (t_b == AD_TYPE_CHG){ 
-                q1q2 = 332.0;}
+                q1q2 = elec_const;}
             else{ 
-                q1q2 = -332.0;}}
+                q1q2 = -elec_const;}}
         else if (t_b == AD_TYPE_CHG){ //t_a not CHG for sure
-            q1q2 = -332.0;}
+            q1q2 = -elec_const;}
 
         fl B = 78.4 + 8.5525;
         fl lB = -B * 0.003627;
