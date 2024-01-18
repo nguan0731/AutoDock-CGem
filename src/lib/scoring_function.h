@@ -34,7 +34,7 @@
 //Forward declaration
 struct model;
 
-enum scoring_function_choice {SF_VINA, SF_AD42, SF_VINARDO};
+enum scoring_function_choice {SF_VINA, SF_AD42, SF_VINARDO, SF_AD4CGEM};
 
 class ScoringFunction {
 public:
@@ -74,6 +74,19 @@ public:
                 m_potentials.push_back(new ad4_vdw(0.5, 100000, 8.0));
                 m_potentials.push_back(new ad4_hb(0.5, 100000, 8.0));
                 m_potentials.push_back(new ad4_electrostatic(100, 20.48));
+                m_potentials.push_back(new ad4_solvation(3.6, 0.01097, true, 20.48));
+                m_potentials.push_back(new linearattraction(20.0));
+                m_conf_independents.push_back(new ad4_tors_add());
+                m_atom_typing = atom_type::AD;
+                m_cutoff = 20.48;
+                m_max_cutoff = 20.48;
+                break;
+            }
+            case SF_AD4CGEM:
+            {
+                m_potentials.push_back(new ad4_vdw(0.5, 100000, 8.0));
+                m_potentials.push_back(new ad4_hb(0.5, 100000, 8.0));
+                m_potentials.push_back(new ad4_electrostatic_hybrid(100, 20.48, true));
                 m_potentials.push_back(new ad4_solvation(3.6, 0.01097, true, 20.48));
                 m_potentials.push_back(new linearattraction(20.0));
                 m_conf_independents.push_back(new ad4_tors_add());

@@ -74,7 +74,7 @@ void Vina::set_receptor(const std::string& rigid_name, const std::string& flex_n
 		// CONDITION 1
 		std::cerr << "ERROR: No (rigid) receptor or flexible residues were specified. (vina.cpp)\n";
 		exit(EXIT_FAILURE);
-	} else if (m_sf_choice == SF_AD42 && !rigid_name.empty()) {
+	} else if ((m_sf_choice == SF_AD42 || m_sf_choice == SF_AD4CGEM) && !rigid_name.empty()) {
 		// CONDITIONS 2, 3
 		std::cerr << "ERROR: Only flexible residues allowed with the AD4 scoring function. No (rigid) receptor.\n";
 		exit(EXIT_FAILURE);
@@ -263,7 +263,7 @@ void Vina::set_ad4_weights(double weight_ad4_vdw , double weight_ad4_hb,
 						   double weight_glue, double weight_ad4_rot) {
 	flv weights;
 
-	if (m_sf_choice == SF_AD42) {
+	if (m_sf_choice == SF_AD42 || m_sf_choice == SF_AD4CGEM) {
 		weights.push_back(weight_ad4_vdw);
 		weights.push_back(weight_ad4_hb);
 		weights.push_back(weight_ad4_elec);
@@ -319,7 +319,7 @@ std::vector<double> Vina::grid_dimensions_from_ligand(double buffer_size) {
 void Vina::compute_vina_maps(double center_x, double center_y, double center_z, double size_x, double size_y, double size_z, double granularity, bool force_even_voxels) {
 	// Setup the search box
 	// Check first that the receptor was added
-	if (m_sf_choice == SF_AD42) {
+	if (m_sf_choice == SF_AD42 || m_sf_choice == SF_AD4CGEM) {
 		std::cerr << "ERROR: Cannot compute Vina affinity maps using the AD4 scoring function.\n";
 		exit(EXIT_FAILURE);
 	} else if (!m_receptor_initialized) {
@@ -556,7 +556,7 @@ std::string Vina::vina_remarks(output_type &pose, fl lb, fl ub) {
 	remark << "REMARK INTER + INTRA:    " << std::setw(12) << std::setprecision(3) << pose.total << "\n";
 	remark << "REMARK INTER:            " << std::setw(12) << std::setprecision(3) << pose.inter << "\n";
 	remark << "REMARK INTRA:            " << std::setw(12) << std::setprecision(3) << pose.intra << "\n";
-	if (m_sf_choice == SF_AD42)
+	if (m_sf_choice == SF_AD42 || m_sf_choice == SF_AD4CGEM)
 		remark << "REMARK CONF_INDEPENDENT: " << std::setw(12) << std::setprecision(3) << pose.conf_independent << "\n";
 	remark << "REMARK UNBOUND:          " << std::setw(12) << std::setprecision(3) << pose.unbound << "\n";
 

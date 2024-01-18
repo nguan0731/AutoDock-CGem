@@ -90,6 +90,9 @@ public:
 		} else if (sf_name.compare("ad4") == 0) {
 			m_sf_choice = SF_AD42;
 			set_ad4_weights();
+		} else if (sf_name.compare("ad4cgem") == 0) {
+			m_sf_choice = SF_AD4CGEM;
+			set_ad4cgem_weights();
 		} else {
 			std::cerr << "ERROR: Scoring function " << sf_name << " not implemented (choices: vina, vinardo or ad4)\n";
 			exit (EXIT_FAILURE);
@@ -116,6 +119,10 @@ public:
 							       double weight_hydrogen=-0.600, double weight_glue=50,
 							       double weight_rot=0.05846);
 	void set_ad4_weights(double weight_ad4_vdw=0.1662, double weight_ad4_hb=0.1209,
+						      double weight_ad4_elec=0.1406, double weight_ad4_dsolv=0.1322,
+						      double weight_glue=50, double weight_ad4_rot=0.2983);
+	// to be updated
+	void set_ad4cgem_weights(double weight_ad4_vdw=0.1662, double weight_ad4_hb=0.1209,
 						      double weight_ad4_elec=0.1406, double weight_ad4_dsolv=0.1322,
 						      double weight_glue=50, double weight_ad4_rot=0.2983);
 	std::vector<double> grid_dimensions_from_ligand(double buffer_size=4);
