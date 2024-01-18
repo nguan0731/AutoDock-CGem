@@ -55,6 +55,7 @@ std::string get_adtype_str(sz& t) {
 }
 
 fl ad4cache::eval(const model& m, fl v) const {
+    std::cout << "ad4cache::eval"<<"\n";
 	fl e = 0;
 	fl e_elec = 0;
 	fl e_shell = 0;
@@ -118,11 +119,12 @@ fl ad4cache::eval(const model& m, fl v) const {
             std::cout << m.coords[i][j] <<" ";
         }
         std::cout << "\n" << "de_electrostatic: " << de << "\n" ;
-		if (t == AD_TYPE_CHG){
+		*/
+        if (t == AD_TYPE_CHG){
             e_shell += de ;
             //std::cout << "e: " << e <<" e_shell: " << e_shell <<"\n";
         }
-        */
+        
 	    if (t == AD_TYPE_CHG) continue;
 
 		// HB + vdW
@@ -148,7 +150,7 @@ fl ad4cache::eval(const model& m, fl v) const {
 }
 
 fl ad4cache::eval_intra(model& m, fl v) const {
-    //std::cout << "ad4cache::eval_intra"<<"\n";
+    std::cout << "ad4cache::eval_intra"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
     sz n_movable_atoms = m.num_movable_atoms();
