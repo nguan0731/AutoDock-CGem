@@ -363,16 +363,13 @@ public:
         fl elec_const = 14.3996 * 23.0609;
         fl q1q2 = a.charge * b.charge * elec_const;
         
-        // modify to check types for ad4_cgem and modify to integer charge
+        // modify to check types for ad4_cgem and for raising error
         sz t_a = a.get(atom_type::AD);
         sz t_b = b.get(atom_type::AD);
-        if(t_a == AD_TYPE_CHG){
-            if (t_b == AD_TYPE_CHG){ 
-                q1q2 = elec_const;}
-            else{ 
-                q1q2 = -elec_const;}}
-        else if (t_b == AD_TYPE_CHG){ //t_a not CHG for sure
-            q1q2 = -elec_const;}
+        //cap = 1;
+        if(t_a == AD_TYPE_CHG or t_b == AD_TYPE_CHG){
+            throw std::invalid_argument( "received AD_TYPE_CHG value in standard function" );
+        };
 
         fl B = 78.4 + 8.5525;
         fl lB = -B * 0.003627;
@@ -389,6 +386,54 @@ private:
     fl cap;
     fl cutoff;
 };
+
+// AD4-CGem
+class ad4_electrostatic_hybrid : public Potential {
+public:
+    ad4_electrostatic_hybrid(fl cap_, fl cutoff_, bool hybrid) : cap(cap_), cutoff(cutoff_) { }
+
+    fl eval(const atom& a, const atom& b, fl r) {
+        // hybrid model
+        // return 0.0;
+        if (r >= cutoff)
+            return 0.0;
+        fl elec_const = 14.3996 * 23.0609;
+        fl q1q2; // = a.charge * b.charge * elec_const;
+        
+        // modify to check types for ad4_cgem and modify to integer charge
+        // bool hybrid = true;
+        if (hybrid){
+            sz t_a = a.get(atom_type::AD);
+            sz t_b = b.get(atom_type::AD);
+            //cap = 1;
+            if(t_a == AD_TYPE_CHG){
+                if (t_b == AD_TYPE_CHG){ 
+                    q1q2 = elec_const;}
+                else{ 
+                    q1q2 = -elec_const;}}
+            else if (t_b == AD_TYPE_CHG){ //t_a not CHG for sure
+                q1q2 = -elec_const;}
+            else {
+                q1q2 = elec_const;}
+        }
+
+        fl B = 78.4 + 8.5525;
+        fl lB = -B * 0.003627;
+        fl diel = -8.5525 + (B / (1 + 7.7839 * std::exp(lB * r)));
+        if (r < epsilon_fl)
+            return q1q2 * cap / diel;
+        else {
+            return q1q2 * (std::min)(cap, 1.0 / (r * diel));
+        }
+    };
+    fl eval(sz t1, sz t2, fl r) { return 0; }
+    fl get_cutoff() { return cutoff; }
+private:
+    fl cap;
+    fl cutoff;
+};
+
+class ad4_solvation : public Potential {
 
 class ad4_solvation : public Potential {
 public:
