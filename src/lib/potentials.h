@@ -431,9 +431,9 @@ public:
 private:
     fl cap;
     fl cutoff;
+    bool hybrid;
 };
 
-class ad4_solvation : public Potential {
 
 class ad4_solvation : public Potential {
 public:

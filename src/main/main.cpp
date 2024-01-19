@@ -309,7 +309,7 @@ Thank you!\n";
 				std::cerr << desc_simple << "ERROR: The receptor or affinity maps must be specified.\n";
 				exit(EXIT_FAILURE);
 			}
-		} else if (sf_name.compare("ad4") == 0) {
+		} else if (sf_name.compare("ad4") == 0 || sf_name.compare("ad4cgem") == 0) {
 			if (vm.count("receptor")) {
 				std::cerr << "ERROR: No receptor allowed, only --flex argument with the AD4 scoring function.\n";
 				exit(EXIT_FAILURE);

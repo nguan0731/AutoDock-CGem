@@ -263,7 +263,28 @@ void Vina::set_ad4_weights(double weight_ad4_vdw , double weight_ad4_hb,
 						   double weight_glue, double weight_ad4_rot) {
 	flv weights;
 
-	if (m_sf_choice == SF_AD42 || m_sf_choice == SF_AD4CGEM) {
+	if (m_sf_choice == SF_AD42) {
+		weights.push_back(weight_ad4_vdw);
+		weights.push_back(weight_ad4_hb);
+		weights.push_back(weight_ad4_elec);
+		weights.push_back(weight_ad4_dsolv);
+		weights.push_back(weight_glue);
+		weights.push_back(weight_ad4_rot);
+
+		// Store in Vina object
+		m_weights = weights;
+
+		// Since we set (different) weights, we automatically initialize the forcefield
+		set_forcefield();
+	}
+}
+
+void Vina::set_ad4cgem_weights(double weight_ad4_vdw , double weight_ad4_hb,
+						   double weight_ad4_elec, double weight_ad4_dsolv,
+						   double weight_glue, double weight_ad4_rot) {
+	flv weights;
+
+	if (m_sf_choice == SF_AD4CGEM) {
 		weights.push_back(weight_ad4_vdw);
 		weights.push_back(weight_ad4_hb);
 		weights.push_back(weight_ad4_elec);

@@ -94,7 +94,7 @@ public:
 			m_sf_choice = SF_AD4CGEM;
 			set_ad4cgem_weights();
 		} else {
-			std::cerr << "ERROR: Scoring function " << sf_name << " not implemented (choices: vina, vinardo or ad4)\n";
+			std::cerr << "ERROR: Scoring function " << sf_name << " not implemented (choices: vina, vinardo, ad4cgem or ad4)\n";
 			exit (EXIT_FAILURE);
 		}
 	}
