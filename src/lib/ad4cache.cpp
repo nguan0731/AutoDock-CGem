@@ -54,7 +54,7 @@ std::string get_adtype_str(sz& t) {
 	}
 }
 
-fl ad4cache::eval(const model& m, fl v) const {
+fl ad4cache::eval(const model& m, fl v, bool hybrid) const {
     std::cout << "ad4cache::eval"<<"\n";
 	fl e = 0;
 	fl e_elec = 0;
@@ -63,24 +63,24 @@ fl ad4cache::eval(const model& m, fl v) const {
     fl e_desolv = 0;
     sz nat = num_atom_types(atom_type::AD);
     sz n_movable_atoms = m.num_movable_atoms();
-    // check if cgem shell exist and flag as hybrid to modify core charge
-    bool hybrid = false;
-    VINA_FOR(i, m.num_atoms()) {
-        if(!m.is_atom_in_ligand(i)) continue; //
-        const atom& a = m.atoms[i];
-        sz t = a.get(atom_type::AD);
-        if(t == AD_TYPE_CHG){
-            hybrid = true;
-            break;
-        }
-    } 
-    std::cout << "hybrid: " << hybrid << "\n";
+    // // check if cgem shell exist and flag as hybrid to modify core charge
+    // bool hybrid = false;
+    // VINA_FOR(i, m.num_atoms()) {
+    //     if(!m.is_atom_in_ligand(i)) continue; //
+    //     const atom& a = m.atoms[i];
+    //     sz t = a.get(atom_type::AD);
+    //     if(t == AD_TYPE_CHG){
+    //         hybrid = true;
+    //         break;
+    //     }
+    // } 
+    // std::cout << "hybrid: " << hybrid << "\n";
 	// VINA_FOR(i, m.num_movable_atoms()) {
 	VINA_FOR(i, m.num_atoms()) {
 		if(!m.is_atom_in_ligand(i)) continue; // we only want ligand interaction
 		const atom& a = m.atoms[i];
 		sz t = a.get(atom_type::AD);
-        if( (t != AD_TYPE_CHG) and i > n_movable_atoms) continue;  
+        if( (t != AD_TYPE_CHG) and i > n_movable_atoms) break;  
 
 		switch (t)
 		{
@@ -113,18 +113,12 @@ fl ad4cache::eval(const model& m, fl v) const {
         // std::cout << "hybrid: " << hybrid << " de: " << de << "\n";
         e += de;
         e_elec += de;
-        /*
-        std::cout << "coords for "<< t <<": ";
-        for (int j = 0; j < 3; j++){
-            std::cout << m.coords[i][j] <<" ";
-        }
-        std::cout << "\n" << "de_electrostatic: " << de << "\n" ;
-		*/
+
         if (t == AD_TYPE_CHG){
             e_shell += de ;
             //std::cout << "e: " << e <<" e_shell: " << e_shell <<"\n";
         }
-        
+        // cgem shell should not contribute to anything but elec
 	    if (t == AD_TYPE_CHG) continue;
 
 		// HB + vdW
@@ -149,22 +143,22 @@ fl ad4cache::eval(const model& m, fl v) const {
 	return e;
 }
 
-fl ad4cache::eval_intra(model& m, fl v) const {
+fl ad4cache::eval_intra(model& m, fl v, bool hybrid) const {
     std::cout << "ad4cache::eval_intra"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
     sz n_movable_atoms = m.num_movable_atoms();
-    // check if cgem shell exist and flag as hybrid to modify core charge
-    bool hybrid = false;
-    VINA_FOR(i, m.num_atoms()) {
-        if(!m.is_atom_in_ligand(i)) continue; //
-        const atom& a = m.atoms[i];
-        sz t = a.get(atom_type::AD);
-        if(t == AD_TYPE_CHG){
-            hybrid = true;
-            break;
-        }
-    } 
+    // // check if cgem shell exist and flag as hybrid to modify core charge
+    // bool hybrid = false;
+    // VINA_FOR(i, m.num_atoms()) {
+    //     if(!m.is_atom_in_ligand(i)) continue; //
+    //     const atom& a = m.atoms[i];
+    //     sz t = a.get(atom_type::AD);
+    //     if(t == AD_TYPE_CHG){
+    //         hybrid = true;
+    //         break;
+    //     }
+    // } 
 	VINA_FOR(i, m.num_atoms()) {
 		if(m.is_atom_in_ligand(i)) continue; // we only want flex-ligand interaction
 		const atom& a = m.atoms[i];
@@ -195,7 +189,7 @@ fl ad4cache::eval_intra(model& m, fl v) const {
 		//e += ge.evaluate(m.coords[i], m_slope, v) * a.charge;
 		bool positive_charge = (a.charge > 0);
         fl de;
-        if (hybrid and positive_charge){
+        if (hybrid and (t != AD_TYPE_CHG)){
 		    de = ge.evaluate(m.coords[i], m_slope, v, positive_charge) * 1.0;
         } else {
 		    de = ge.evaluate(m.coords[i], m_slope, v, positive_charge) * a.charge;
@@ -215,22 +209,22 @@ fl ad4cache::eval_intra(model& m, fl v) const {
 	return e;
 }
 
-fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
+fl ad4cache::eval_deriv(model& m, fl v, bool hybrid) const { // sets m.minus_forces
     //std::cout << "ad4cache::eval_deriv"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
     sz n_movable_atoms = m.num_movable_atoms();
-    // check if cgem shell exist and flag as hybrid to modify core charge
-    bool hybrid = false;
-    VINA_FOR(i, m.num_atoms()) {
-        if(!m.is_atom_in_ligand(i)) continue; //
-        const atom& a = m.atoms[i];
-        sz t = a.get(atom_type::AD);
-        if(t == AD_TYPE_CHG){
-            hybrid = true;
-            break;
-        }
-    } 
+    // // check if cgem shell exist and flag as hybrid to modify core charge
+    // bool hybrid = false;
+    // VINA_FOR(i, m.num_atoms()) {
+    //     if(!m.is_atom_in_ligand(i)) continue; //
+    //     const atom& a = m.atoms[i];
+    //     sz t = a.get(atom_type::AD);
+    //     if(t == AD_TYPE_CHG){
+    //         hybrid = true;
+    //         break;
+    //     }
+    // } 
 	VINA_FOR(i, m.num_atoms()) {
 		const atom& a = m.atoms[i];
 		sz t = a.get(atom_type::AD);
@@ -261,7 +255,7 @@ fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
 		const grid& ge = m_grids[AD_TYPE_SIZE];
 		bool positive_charge = (a.charge > 0);
         fl de;
-		if (positive_charge and hybrid){
+		if (hybrid and (t != AD_TYPE_CHG)){
             de = ge.evaluate(m.coords[i], m_slope, v, deriv, positive_charge) * 1.0;
         } else {
             de = ge.evaluate(m.coords[i], m_slope, v, deriv, positive_charge) * a.charge;

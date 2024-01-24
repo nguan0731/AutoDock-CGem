@@ -754,13 +754,27 @@ std::vector<double> Vina::score(double intramolecular_energy) {
 		total = m_scoring_function.conf_independent(m_model, inter + intra - intramolecular_energy); // we pass intermolecular energy from the best pose
 		// Torsion, we want to know how much torsion penalty was added to the total energy
 		conf_independent = total - (inter + intra - intramolecular_energy);
-	} else {
+	} else if (m_sf_choice == SF_AD42) {
 		// Inter
-        lig_grids = m_ad4grid.eval(m_model, authentic_v[1]); // [1] ligand - grid
+        lig_grids = m_ad4grid.eval(m_model, authentic_v[1], false); // [1] ligand - grid
 		inter_pairs = m_model.eval_inter(m_precalculated_byatom, authentic_v); // [1] ligand - flex
 		inter = lig_grids + inter_pairs;
 		// Intra
-		flex_grids = m_ad4grid.eval_intra(m_model, authentic_v[1]); // [1] flex - grid
+		flex_grids = m_ad4grid.eval_intra(m_model, authentic_v[1],false); // [1] flex - grid
+		intra_pairs = m_model.evalo(m_precalculated_byatom, authentic_v); // [1] flex_i - flex_i and flex_i - flex_j
+		lig_intra = m_model.evali(m_precalculated_byatom, authentic_v); // [2] ligand_i - ligand_i
+		intra = flex_grids + intra_pairs + lig_intra;
+		// Torsion
+		conf_independent = m_scoring_function.conf_independent(m_model, 0); // [3] we can pass e=0 because we do not modify the energy like in vina
+		// Total
+		total = inter + conf_independent; // (+ intra - intra)
+	} else { //m_sf_choice == SF_AD4CGEM
+		// Inter
+        lig_grids = m_ad4grid.eval(m_model, authentic_v[1], true); // [1] ligand - grid
+		inter_pairs = m_model.eval_inter(m_precalculated_byatom, authentic_v); // [1] ligand - flex
+		inter = lig_grids + inter_pairs;
+		// Intra
+		flex_grids = m_ad4grid.eval_intra(m_model, authentic_v[1],true); // [1] flex - grid
 		intra_pairs = m_model.evalo(m_precalculated_byatom, authentic_v); // [1] flex_i - flex_i and flex_i - flex_j
 		lig_intra = m_model.evali(m_precalculated_byatom, authentic_v); // [2] ligand_i - ligand_i
 		intra = flex_grids + intra_pairs + lig_intra;
