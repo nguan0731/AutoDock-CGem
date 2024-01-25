@@ -42,10 +42,10 @@
 
 struct ad4cache : public igrid {
 public:
-    ad4cache(fl slope=1e6): m_slope(slope), m_grids(AD_TYPE_SIZE + 2) {}
-	fl eval      (const model& m, fl v, bool hybrid) const; // needs m.coords // clean up
-	fl eval_intra(      model& m, fl v, bool hybrid) const; // needs m.coords, sets m.minus_forces // clean up
-	fl eval_deriv(      model& m, fl v, bool hybrid) const; // needs m.coords, sets m.minus_forces // clean up
+    ad4cache(fl slope=1e6, bool hybrid = false): m_slope(slope), m_grids(AD_TYPE_SIZE + 2) {}
+	fl eval      (const model& m, fl v) const; // needs m.coords // clean up
+	fl eval_intra(      model& m, fl v) const; // needs m.coords, sets m.minus_forces // clean up
+	fl eval_deriv(      model& m, fl v) const; // needs m.coords, sets m.minus_forces // clean up
     grid_dims gd() const { return m_gd; }
     vec corner1() const { vec corner(m_gd[0].begin, m_gd[1].begin, m_gd[2].begin); return corner; }
     vec corner2() const { vec corner(m_gd[0].end, m_gd[1].end, m_gd[2].end); return corner; }
@@ -59,6 +59,7 @@ private:
 	grid_dims m_gd;
 	fl m_slope; // does not get (de-)serialized
 	std::vector<grid> m_grids;
+    bool hybrid;
 };
 
 #endif

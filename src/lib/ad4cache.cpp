@@ -54,7 +54,7 @@ std::string get_adtype_str(sz& t) {
 	}
 }
 
-fl ad4cache::eval(const model& m, fl v, bool hybrid) const {
+fl ad4cache::eval(const model& m, fl v) const {
     std::cout << "ad4cache::eval"<<"\n";
 	fl e = 0;
 	fl e_elec = 0;
@@ -143,7 +143,7 @@ fl ad4cache::eval(const model& m, fl v, bool hybrid) const {
 	return e;
 }
 
-fl ad4cache::eval_intra(model& m, fl v, bool hybrid) const {
+fl ad4cache::eval_intra(model& m, fl v) const {
     std::cout << "ad4cache::eval_intra"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
@@ -209,7 +209,7 @@ fl ad4cache::eval_intra(model& m, fl v, bool hybrid) const {
 	return e;
 }
 
-fl ad4cache::eval_deriv(model& m, fl v, bool hybrid) const { // sets m.minus_forces
+fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
     //std::cout << "ad4cache::eval_deriv"<<"\n";
 	fl e = 0;
 	sz nat = num_atom_types(atom_type::AD);
