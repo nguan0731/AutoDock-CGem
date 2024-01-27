@@ -104,19 +104,20 @@ fl ad4cache::eval(const model& m, fl v) const {
         fl de;
         if (hybrid and (t != AD_TYPE_CHG)){
             de = ge.evaluate(m.coords[i], m_slope, v) * 1.0;
-            // std::cout << "core type: " << t << " de: " << de << "\n";
+			// if (std::abs(de) > 100){
+				// std::cout << "core type: " << t << " de: " << de << "\n";}
         }
         else{
 		    de = ge.evaluate(m.coords[i], m_slope, v, positive_charge) * a.charge;
-            // std::cout << "a.charge: " << a.charge << " de: " << de << "\n";
+			// if (std::abs(de) > 1000.0){
+            // 	std::cout << "a.charge: " << a.charge << " de: " << de << "\n";
+			// 	}
         }
-        // std::cout << "hybrid: " << hybrid << " de: " << de << "\n";
         e += de;
         e_elec += de;
 
         if (t == AD_TYPE_CHG){
             e_shell += de ;
-            //std::cout << "e: " << e <<" e_shell: " << e_shell <<"\n";
         }
         // cgem shell should not contribute to anything but elec
 	    if (t == AD_TYPE_CHG) continue;
