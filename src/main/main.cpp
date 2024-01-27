@@ -65,7 +65,7 @@ void check_occurrence(boost::program_options::variables_map& vm, boost::program_
 int main(int argc, char* argv[]) {
 	using namespace boost::program_options;
 	const std::string git_version = VERSION;
-	const std::string version_string = "AutoDock Vina " + git_version;
+	const std::string version_string = "AutoDock Vina(CGem) " + git_version;
 	const std::string error_message = "\n\n\
 Please report bugs through the Issue Tracker on GitHub \n\
 (https://github.com/ccsb-scripps/AutoDock-Vina/issues)., so\n\
@@ -139,6 +139,13 @@ Thank you!\n";
 		double weight_ad4_elec  = 0.1406;
 		double weight_ad4_dsolv = 0.1322;
 		double weight_ad4_rot   = 0.2983;
+
+		// autodock4cgem weights
+		double weight_ad4cgem_vdw   = 0.16842326;
+		double weight_ad4cgem_hb    = 0.1407314;
+		double weight_ad4cgem_elec  = 0.05026277;
+		double weight_ad4cgem_dsolv = 0.03362517;
+		double weight_ad4cgem_rot   = 0.32885698;
 
 		// vina weights
 		double weight_gauss1      = -0.035579;
@@ -223,6 +230,12 @@ Thank you!\n";
 			("weight_ad4_elec", value<double>(&weight_ad4_elec)->default_value(weight_ad4_elec), "ad4_elec weight")
 			("weight_ad4_dsolv", value<double>(&weight_ad4_dsolv)->default_value(weight_ad4_dsolv), "ad4_dsolv weight")
 			("weight_ad4_rot", value<double>(&weight_ad4_rot)->default_value(weight_ad4_rot), "ad4_rot weight")
+
+			("weight_ad4cgem_vdw", value<double>(&weight_ad4cgem_vdw)->default_value(weight_ad4cgem_vdw), "ad4cgem_vdw weight")
+			("weight_ad4cgem_hb", value<double>(&weight_ad4cgem_hb)->default_value(weight_ad4cgem_hb), "ad4cgem_hb weight")
+			("weight_ad4cgem_elec", value<double>(&weight_ad4cgem_elec)->default_value(weight_ad4cgem_elec), "ad4cgem_elec weight")
+			("weight_ad4cgem_dsolv", value<double>(&weight_ad4cgem_dsolv)->default_value(weight_ad4cgem_dsolv), "ad4cgem_dsolv weight")
+			("weight_ad4cgem_rot", value<double>(&weight_ad4cgem_rot)->default_value(weight_ad4cgem_rot), "ad4cgem_rot weight")
 
 			("weight_glue", value<double>(&weight_glue)->default_value(weight_glue),                      "macrocycle glue weight")
 		;
@@ -399,7 +412,7 @@ Thank you!\n";
 		} else if (sf_name.compare("vinardo") == 0) {
 			v.set_vinardo_weights(weight_vinardo_gauss1, weight_vinardo_repulsion,
 								  weight_vinardo_hydrophobic, weight_vinardo_hydrogen, weight_glue, weight_rot);
-		} else {
+		} else if (sf_name.compare("ad4") == 0){
 			v.set_ad4_weights(weight_ad4_vdw, weight_ad4_hb, weight_ad4_elec,
 							  weight_ad4_dsolv, weight_glue, weight_ad4_rot);
 			v.load_maps(maps);
@@ -407,6 +420,14 @@ Thank you!\n";
 			// It works, but why would you do this?!
 			if (vm.count("write_maps"))
 				v.write_maps(out_maps);
+		} else { // ad4cgem
+			v.set_ad4cgem_weights(weight_ad4cgem_vdw, weight_ad4cgem_hb, weight_ad4cgem_elec,
+							  weight_ad4cgem_dsolv, weight_glue, weight_ad4cgem_rot);
+			v.load_maps(maps);
+
+			// // It works, but why would you do this?!
+			// if (vm.count("write_maps"))
+			// 	v.write_maps(out_maps);
 		}
 
 		if (vm.count("ligand")) {
