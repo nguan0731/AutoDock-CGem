@@ -42,7 +42,7 @@
 
 struct ad4cache : public igrid {
 public:
-    ad4cache(fl slope=1e6, bool hybrid = false): m_slope(slope), m_grids(AD_TYPE_SIZE + 2) {}
+    ad4cache(fl slope=1e6, bool hybrid = false): m_slope(slope), m_grids(AD_TYPE_SIZE + 2), hybrid(hybrid) {}
 	fl eval      (const model& m, fl v) const; // needs m.coords // clean up
 	fl eval_intra(      model& m, fl v) const; // needs m.coords, sets m.minus_forces // clean up
 	fl eval_deriv(      model& m, fl v) const; // needs m.coords, sets m.minus_forces // clean up

@@ -366,7 +366,6 @@ public:
         // modify to check types for ad4_cgem and for raising error
         sz t_a = a.get(atom_type::AD);
         sz t_b = b.get(atom_type::AD);
-        //cap = 1;
         if(t_a == AD_TYPE_CHG or t_b == AD_TYPE_CHG){
             throw std::invalid_argument( "received AD_TYPE_CHG value in standard function" );
         };
@@ -390,7 +389,7 @@ private:
 // AD4-CGem
 class ad4_electrostatic_hybrid : public Potential {
 public:
-    ad4_electrostatic_hybrid(fl cap_, fl cutoff_, bool hybrid) : cap(cap_), cutoff(cutoff_) { }
+    ad4_electrostatic_hybrid(fl cap_, fl cutoff_, bool hybrid_) : cap(cap_), cutoff(cutoff_), hybrid(hybrid_) { }
 
     fl eval(const atom& a, const atom& b, fl r) {
         // hybrid model
@@ -405,7 +404,7 @@ public:
         if (hybrid){
             sz t_a = a.get(atom_type::AD);
             sz t_b = b.get(atom_type::AD);
-            //cap = 1;
+
             if(t_a == AD_TYPE_CHG){
                 if (t_b == AD_TYPE_CHG){ 
                     q1q2 = elec_const;}
@@ -420,6 +419,10 @@ public:
         fl B = 78.4 + 8.5525;
         fl lB = -B * 0.003627;
         fl diel = -8.5525 + (B / (1 + 7.7839 * std::exp(lB * r)));
+        // if  (1.0 / (r * diel) > cap){
+        //     std::cout << "r: " << r << " e: " << q1q2 * (std::min)(cap, 1.0 / (r * diel)) << " q1q2: "<< q1q2 << " diel: "<< diel <<"\n";
+        // }
+
         if (r < epsilon_fl)
             return q1q2 * cap / diel;
         else {
