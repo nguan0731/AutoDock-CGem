@@ -72,11 +72,10 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv, bool posi
 	fl penalty = slope * (miss * m_factor_inv); // FIXME check that inv_factor is correctly initialized and serialized
 	assert(penalty > -epsilon_fl);
     // fix problem of OC penalty gives large negative energy contribution
-    /*
     if (!positive_charge){
-        penalty = 0; //-penalty;
+        penalty = -penalty;
     }
-    */
+    
     /*    
     if (penalty > 0){
            
@@ -184,9 +183,29 @@ fl grid::evaluate_aux(const vec& location, fl slope, fl v, vec* deriv, bool posi
 	else {
 		curl(f, v);
         /*
+		for debug
         if (penalty > 0){
             std::cout << "In grid else, f:"<< f <<"  penalty: "<< penalty << "\n";
         }*/
+		// if (std::abs(f) > 500.0){
+		// 	std::cout << "f: "    << f    << std::endl;
+		// 	std::cout << "f+penalty: "    << f + penalty    << std::endl;
+		// 	std::cout << "f000: " << f000 << std::endl;
+		// 	std::cout << "f100: " << f100 << std::endl;
+		// 	std::cout << "f010: " << f010 << std::endl;
+		// 	std::cout << "f110: " << f110 << std::endl;
+		// 	std::cout << "f001: " << f001 << std::endl;
+		// 	std::cout << "f101: " << f101 << std::endl;
+		// 	std::cout << "f011: " << f011 << std::endl;
+		// 	std::cout << "f111: " << f111 << std::endl;
+		// 	std::cout << "mx: "   << mx   << std::endl;
+		// 	std::cout << "my: "   << my   << std::endl;
+		// 	std::cout << "mz: "   << mz   << std::endl;
+		// 	std::cout << "x: "    << x    << std::endl;
+		// 	std::cout << "y: "    << y    << std::endl;
+		// 	std::cout << "z: "    << z    << std::endl;
+		// 	// exit(1);
+		// 	}
 		return f + penalty;
 	}
 } 
