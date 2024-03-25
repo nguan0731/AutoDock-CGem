@@ -75,7 +75,8 @@ const sz AD_TYPE_CG2  = 28;
 const sz AD_TYPE_CG3  = 29;
 const sz AD_TYPE_W    = 30; // hydrated ligand
 const sz AD_TYPE_CHG  = 31; // offsite charge
-const sz AD_TYPE_SIZE = 32;
+const sz AD_TYPE_DH  = 32; // Dummy Hydrogen
+const sz AD_TYPE_SIZE = 33;
 
 // X-Score
 const sz XS_TYPE_C_H   =  0;
@@ -111,7 +112,8 @@ const sz XS_TYPE_C_P_CG3 = 29;
 const sz XS_TYPE_G3      = 30;
 const sz XS_TYPE_W       = 31; // hydrated ligand
 const sz XS_TYPE_CHG     = 32; // offsite charge
-const sz XS_TYPE_SIZE    = 33;
+const sz XS_TYPE_DH     = 33; // Dummy Hydrogen
+const sz XS_TYPE_SIZE    = 34;
 
 // DrugScore-CSD
 const sz SY_TYPE_C_3   =  0;
@@ -180,7 +182,8 @@ const atom_kind atom_kind_data[] = {
 	{"CG2",2.00000, 0.15000, 0.0, 0.0,   -0.00143,   33.51030,   0.77}, // 28
 	{"CG3",2.00000, 0.15000, 0.0, 0.0,   -0.00143,   33.51030,   0.77}, // 29
 	{"W",  0.00000, 0.00000, 0.0, 0.0,    0.00000,    0.00000,   0.00}, // 30
-	{"OC", 0.00000, 0.00000, 0.0, 0.0,    0.00000,    0.00000,   0.00}  // 31
+	{"OC", 0.00000, 0.00000, 0.0, 0.0,    0.00000,    0.00000,   0.00},  // 31
+	{"DH", 0.00000, 0.00000, 0.0, 0.0,    0.00000,    0.00000,   0.00}  // 32
 };
 
 const fl metal_solvation_parameter = -0.00110;
@@ -258,6 +261,7 @@ inline sz ad_type_to_el_type(sz t) {
 		case AD_TYPE_G3   : return EL_TYPE_Dummy;
 		case AD_TYPE_W    : return EL_TYPE_Dummy;
 		case AD_TYPE_CHG  : return EL_TYPE_Dummy;
+		case AD_TYPE_DH   : return EL_TYPE_Dummy;
 		case AD_TYPE_SIZE : return EL_TYPE_SIZE;
 		default: VINA_CHECK(false);
 	}
@@ -297,7 +301,8 @@ const fl xs_vdw_radii[] = {
     0.0, // G2
     0.0, // G3
     0.0, // W
-    0.0  // CHG
+    0.0,  // CHG
+	0.0  // DH
 };
 
 const fl xs_vinardo_vdw_radii[] = {
@@ -333,7 +338,8 @@ const fl xs_vinardo_vdw_radii[] = {
 	0.0, // G2
 	0.0, // G3
 	0.0, // W
-	0.0	 // CHG
+	0.0,	 // CHG
+	0.0  // DH
 };
 
 inline fl xs_radius(sz t) {

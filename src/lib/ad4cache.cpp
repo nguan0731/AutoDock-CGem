@@ -50,6 +50,8 @@ std::string get_adtype_str(sz& t) {
 		case AD_TYPE_Si: return "Si";
 		case AD_TYPE_At: return "At";
 		case AD_TYPE_W : return "W";
+		case AD_TYPE_CHG : return "OC";
+		case AD_TYPE_DH : return "DH";
 		default: VINA_CHECK(false);
 	}
 }
@@ -120,7 +122,7 @@ fl ad4cache::eval(const model& m, fl v) const {
             e_shell += de ;
         }
         // cgem shell should not contribute to anything but elec
-	    if (t == AD_TYPE_CHG) continue;
+	    if (t == AD_TYPE_CHG or t == AD_TYPE_DH) continue;
 
 		// HB + vdW
 		const grid& g = m_grids[t];
@@ -197,7 +199,7 @@ fl ad4cache::eval_intra(model& m, fl v) const {
         }    
         e += de;
 
-		if (t == AD_TYPE_CHG) continue;
+		if (t == AD_TYPE_CHG or t == AD_TYPE_DH) continue;
 
 		// HB + vdW
 		const grid& g = m_grids[t];
@@ -267,7 +269,7 @@ fl ad4cache::eval_deriv(model& m, fl v) const { // sets m.minus_forces
 		deriv *= a.charge;
 		m.minus_forces[i] = deriv;
 
-		if (t == AD_TYPE_CHG) continue;
+		if (t == AD_TYPE_CHG or t == AD_TYPE_DH) continue;
 
 		// HB + vdW
 		const grid& g = m_grids[t];
@@ -308,6 +310,7 @@ bool ad4cache::are_atom_types_grid_initialized(szv atom_types) const {
 			case AD_TYPE_G2:
 			case AD_TYPE_G3:
 			case AD_TYPE_CHG:
+			case AD_TYPE_DH:
 				continue;
 			case AD_TYPE_CG0:
 			case AD_TYPE_CG1:
